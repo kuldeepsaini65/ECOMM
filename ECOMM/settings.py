@@ -85,7 +85,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "ecomm_assignment",
         "USER": "root",
-        "PASSWORD": "",
+        "PASSWORD": env('DATABASE_PASSWORD'),
         "HOST": "127.0.0.1",
         "PORT": "3306",
     }
