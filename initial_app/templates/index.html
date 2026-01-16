@@ -1,0 +1,269 @@
+{% load mathfilters %}
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limited Products</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+        }
+
+        .cart-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+
+        .modal-footer {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Simple Navbar -->
+    <nav class="navbar navbar-light bg-white border-bottom">
+        <div class="container">
+            <a class="navbar-brand fw-semibold fs-4 text-dark" href="#">Assignment Project</a>
+            <div>
+                <button type="button" class="btn " data-bs-toggle="modal" data-bs-target="#cart">
+                    <i class="bi bi-cart"></i> Cart
+                </button>
+
+                <button type="button" class="btn " data-bs-toggle="modal" data-bs-target="#orders">
+                    <i class="bi bi-box2"></i> Orders
+                </button>
+            </div>
+        </div>
+
+    </nav>
+
+    <!-- Content -->
+    <div class="container py-5">
+        <!-- Header -->
+        <div class="text-center mb-5">
+            <h1 class="h2 fw-semibold text-dark mb-2">Limited Products</h1>
+            <div class="w-25 mx-auto border-bottom border-3 border-light"></div>
+        </div>
+
+        <!-- Products -->
+        <div class="row g-4">
+            {% for items in data %}
+            <div class="col-md-4">
+                <div class="card border-0 bg-white shadow-sm h-100">
+                    <img src="{{ items.image.url }}" class="card-img-top" style="height: 220px; object-fit: cover;">
+
+                    <div class="card-body p-4 d-flex flex-column">
+
+                        <span class="badge bg-light text-dark border fw-medium px-3 py-2 mb-3 align-self-start">
+                            LIMITED STOCK
+                        </span>
+
+                        <h5 class="card-title fw-semibold text-dark mb-2">
+                            {{ items.name }}
+                        </h5>
+
+                        <p class="text-muted small mb-3">{{ items.description }}</p>
+
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="h4 fw-bold text-dark mb-0 price" data-unit-price="{{ items.price }}">
+                                ₹{{ items.price|intcomma }}
+                            </div>
+                            <small class="text-muted">
+                                <i class="fas fa-star text-warning me-1"></i>4.9
+                            </small>
+                        </div>
+
+
+                        <form method="POST" action="{% url 'initial:add_cart' %}" class="mt-auto">
+                            {% csrf_token %}
+
+
+                            <input type="hidden" name="product_id" value="{{ items.id }}">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <label class="fw-medium text-muted small mb-0">
+                                    Quantity
+                                </label>
+                                <input type="number" name="quantity"
+                                    class="form-control form-control-sm w-50 quantity-input"
+                                    data-unit-price="{{ items.price }}" value="1" min="1">
+                            </div>
+
+                            <button type="submit" class="btn btn-outline-dark w-100 fw-medium">
+                                Add to Cart
+                            </button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+
+
+            <!-- Cart Modal -->
+            <div class="modal fade" id="cart" tabindex="-1" aria-labelledby="cartLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <h5 class="modal-title fw-semibold" id="cartLabel">
+                                🛒 Your Cart
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+
+
+                            {% for cart in cart_items %}
+                            <div class="cart-item d-flex align-items-center mb-3 pb-3 border-bottom">
+                                <img src="{{cart.item.image.url}}" class="rounded" alt="product">
+
+                                <div class="ms-3 flex-grow-1">
+                                    <h6 class="mb-1">{{cart.item.name}}</h6>
+                                    <small class="text-muted">₹ {{cart.item.price|intcomma}}</small>
+
+                                    <div class="d-flex align-items-center mt-2">
+                                        <button class="btn btn-outline-secondary btn-sm">Qty</button>
+                                        <span class="mx-2">{{cart.quantity}}</span>
+                                    </div>
+                                </div>
+
+                                <div class="text-end">
+                                    <p class="mb-1 fw-semibold">₹{{cart.item.price|mul:cart.quantity|intcomma}}</p>
+                                    <a class="btn btn-sm text-danger" href="{% url 'initial:cart_delete' id=cart.id %}">
+                                        Remove <i class="bi bi-trash3"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="cart-item d-flex align-items-center mb-3 pb-3 border-bottom">
+                                <div class="ms-3 flex-grow-1">
+                                    <h2 class="mb-1 text-center">Nothing in Cart</h2>
+                                </div>
+                            </div>
+                            {% endfor %}
+
+
+                            <!-- Footer -->
+                            <div class="modal-footer d-flex flex-column align-items-stretch">
+
+                                <div class="w-100 d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Subtotal</span>
+                                    <span class="fw-semibold">₹1,097</span>
+                                </div>
+
+                                <div class="w-100 d-flex justify-content-between mb-3">
+                                    <span class="text-muted">Shipping</span>
+                                    <span class="text-success">Free</span>
+                                </div>
+
+                                <div class="w-100 d-flex justify-content-between fs-5 fw-bold mb-3">
+                                    <span>Total</span>
+                                    <span>₹1,097</span>
+                                </div>
+
+                                <div class="d-flex gap-2 w-100">
+                                    <button class="btn btn-outline-secondary w-50" data-bs-dismiss="modal">
+                                        Continue Shopping
+                                    </button>
+
+                                    <a class="btn btn-primary w-50" href="{% url 'initial:checkout' %}">
+                                        Checkout
+                                    </a>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Orders -->
+                <div class="modal fade" id="orders" tabindex="-1" aria-labelledby="ordersLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="ordersLabel">Modal title</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                ...
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Save changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+        <!-- Alert Messages 10:19 PM -->
+        <div class="toast-container position-fixed top-0 end-0 p-3">
+            {% for message in messages %}
+            <div class="toast align-items-center text-bg-{{ message.tags }} border-0 mb-2" role="alert"
+                aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        {{ message }}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close">
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const toastElements = document.querySelectorAll(".toast");
+                toastElements.forEach(toastEl => {
+                    const toast = new bootstrap.Toast(toastEl, {
+                        delay: 3000
+                    });
+                    toast.show();
+                });
+            });
+        </script>
+
+
+        <script>
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const qty = Math.max(parseInt(this.value) || 1, 1);
+                    this.value = qty;
+                    const unitPrice = parseFloat(this.dataset.unitPrice);
+                    const card = this.closest('.card');
+                    const priceEl = card.querySelector('.price');
+                    const total = qty * unitPrice;
+                    priceEl.innerText = `₹${total.toLocaleString('en-IN')}`;
+                });
+            });
+        </script>
+
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
