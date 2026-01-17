@@ -5,6 +5,14 @@ It demonstrates product listing, cart management, Stripe (test mode) payment int
 
 ---
 
+## 🌐 Live Project URL
+
+The project is deployed and accessible at:
+
+👉 https://ecom.kuldeepsaini.in
+
+Stripe is configured in test mode, so test card details can be used safely.
+
 ## 📌 Assumptions
 
 Since the assignment specification was intentionally minimal, the following assumptions were made:
