@@ -44,9 +44,17 @@
                     <i class="bi bi-cart"></i> Cart
                 </button>
 
-                <button type="button" class="btn " data-bs-toggle="modal" data-bs-target="#orders">
+                <!-- <button type="button" class="btn " data-bs-toggle="modal" data-bs-target="#orders">
+                    <i class="bi bi-box2"></i> Orders
+                </button> -->
+
+                <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#orders">
                     <i class="bi bi-box2"></i> Orders
                 </button>
+
+                <a  class="btn" href="{% url 'initial:logout' %}">
+                    <i class="bi bi-box-arrow-left"></i> Logout
+                </a>
             </div>
         </div>
 
@@ -61,11 +69,11 @@
         </div>
 
         <!-- Products -->
-        <div class="row g-4">
+        <div class="row g-4 justify-content-center">
             {% for items in data %}
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card border-0 bg-white shadow-sm h-100">
-                    <img src="{{ items.image.url }}" class="card-img-top" style="height: 220px; object-fit: cover;">
+                    <img src="{{ items.image.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
 
                     <div class="card-body p-4 d-flex flex-column">
 
@@ -73,14 +81,14 @@
                             LIMITED STOCK
                         </span>
 
-                        <h5 class="card-title fw-semibold text-dark mb-2">
+                        <h5 class="card-title fw-semibold text-dark mb-2" style="font-size: 16px;">
                             {{ items.name }}
                         </h5>
 
-                        <p class="text-muted small mb-3">{{ items.description }}</p>
+                        <!-- <p class="text-muted small mb-3">{{ items.description }}</p> -->
 
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <div class="h4 fw-bold text-dark mb-0 price" data-unit-price="{{ items.price }}">
+                            <div class="h5 fw-bold text-dark mb-0 price" data-unit-price="{{ items.price }}">
                                 ₹{{ items.price|intcomma }}
                             </div>
                             <small class="text-muted">
@@ -163,20 +171,7 @@
                             <!-- Footer -->
                             <div class="modal-footer d-flex flex-column align-items-stretch">
 
-                                <div class="w-100 d-flex justify-content-between mb-2">
-                                    <span class="text-muted">Subtotal</span>
-                                    <span class="fw-semibold">₹1,097</span>
-                                </div>
-
-                                <div class="w-100 d-flex justify-content-between mb-3">
-                                    <span class="text-muted">Shipping</span>
-                                    <span class="text-success">Free</span>
-                                </div>
-
-                                <div class="w-100 d-flex justify-content-between fs-5 fw-bold mb-3">
-                                    <span>Total</span>
-                                    <span>₹1,097</span>
-                                </div>
+                               
 
                                 <div class="d-flex gap-2 w-100">
                                     <button class="btn btn-outline-secondary w-50" data-bs-dismiss="modal">
@@ -192,31 +187,142 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
 
-                <!-- Orders -->
-                <div class="modal fade" id="orders" tabindex="-1" aria-labelledby="ordersLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="ordersLabel">Modal title</h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                ...
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary">Save changes</button>
+            <!-- Orders Modal-->
+            <div class="modal fade" id="orders" tabindex="-1" aria-labelledby="ordersLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="ordersLabel">My Orders</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="table-responsive">
+                                <table class="table align-middle">
+                                    <thead>
+                                        <tr>
+                                            <!-- <th>Order</th> -->
+                                            <th>Product</th>
+                                            <!-- <th>Qty</th> -->
+                                            <th>Date</th>
+                                            <th>Total</th>
+                                            <th>Status</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for order in orders %}
+                                        <tr>
+                                            <!-- <td>#{{ order.id }}</td> -->
+                                            <td>
+                                                {% for item in order.items.all %}
+                                                {{ item.product.name }} x {{ item.quantity }},<br>
+                                                {% endfor %}
+                                            </td>
+                                            
+                                            <td>{{ order.created_at|date:"d M Y" }}</td>
+                                            <td>₹{{ order.total_amount|intcomma }}</td>
+                                            <td>
+                                                {% if order.status == "PAID" %}
+                                                <span class="badge bg-success">Paid</span>
+                                                {% elif order.status == "PENDING" %}
+                                                <span class="badge bg-warning text-dark">Pending</span>
+                                                {% else %}
+                                                <span class="badge bg-danger">Failed</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                                    data-bs-target="#orderDetailsModal{{order.id}}">
+                                                    View
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+
                             </div>
                         </div>
                     </div>
                 </div>
-
-
             </div>
+
+
+            <!-- Order Details Modal -->
+            {% for order in orders %}
+            <div class="modal fade" id="orderDetailsModal{{order.id}}" tabindex="-1">
+                <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                    <div class="modal-content">
+
+                        <!-- Header -->
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                Order #{{ order.id }}
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <!-- Body -->
+                        <div class="modal-body">
+
+                            <!-- Order Summary -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Date:</strong> {{ order.created_at|date:"d M Y" }}</p>
+                                    <p class="mb-1"><strong>Total:</strong> ₹{{ order.total_amount }}</p>
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    {% if order.status == "PAID" %}
+                                    <span class="badge bg-success">Paid</span>
+                                    {% elif order.status == "PENDING" %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Failed</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <!-- Order Items -->
+                            <h6 class="mb-3">Items</h6>
+
+                            {% for item in order.items.all %}
+                            <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                                <div>
+                                    <strong>{{ item.product.name }}</strong><br>
+                                    <small class="text-muted">
+                                        ₹{{ item.price }} × {{ item.quantity }}
+                                    </small>
+                                </div>
+                                <div>
+                                    ₹{{ item.price|floatformat:2 }}
+                                </div>
+                            </div>
+                            {% endfor %}
+
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" data-bs-dismiss="modal">
+                                Close
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+
+
         </div>
+
+
 
         <!-- Alert Messages 10:19 PM -->
         <div class="toast-container position-fixed top-0 end-0 p-3">
@@ -264,6 +370,7 @@
 
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 
 </html>

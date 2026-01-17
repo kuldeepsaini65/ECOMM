@@ -5,6 +5,8 @@ app_name = 'initial'
 
 urlpatterns = [
     path('', home, name='home'),
+    path('login/', login, name='login'),
+    path('logout/', logout, name='logout'),
     path('add-to-cart/', add_cart, name='add_cart'),
     path('remove-cart-item/<int:id>', cart_delete, name='cart_delete'),
     path("checkout/", create_checkout_session, name="checkout"),

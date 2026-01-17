@@ -7,18 +7,44 @@ from django.contrib.auth.decorators import login_required
 from decimal import Decimal
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import authenticate, login as LogIn, logout as LogOut
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
+
+def login(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            LogIn(request, user)
+            return redirect("initial:home") 
+        else:
+            return render(request, "login.html", {"error": "Invalid credentials"})
+
+    return render(request, "login.html")
+
+
+def logout(request):
+    LogOut(request)
+    return redirect('initial:login') 
+
+
+@login_required(login_url='initial:login')
 def home(request):
     context = {}
     context['data'] = Products.objects.all()
     context['cart_items'] = Cart.objects.filter(user=request.user)
+    context['orders'] = Order.objects.prefetch_related("items__product").filter(user=request.user).order_by("-created_at")
     return render(request, 'index.html', context = context)
 
 
+
+@login_required(login_url='initial:login')
 def add_cart(request):
     if request.method != "POST":
         messages.error(request, 'Request method is not Valid..')
@@ -40,6 +66,8 @@ def add_cart(request):
     return redirect('initial:home')
 
 
+
+@login_required(login_url='initial:login')
 def cart_delete(request, id):
     cart_item = Cart.objects.get(id=id)
     if cart_item.user == request.user:
@@ -54,9 +82,9 @@ def cart_delete(request, id):
 
 
 
-from decimal import Decimal
 
-@login_required
+
+@login_required(login_url='initial:login')
 def create_checkout_session(request):
     cart_items = Cart.objects.select_related("item").filter(user=request.user)
 
@@ -82,8 +110,8 @@ def create_checkout_session(request):
         payment_method_types=["card"],
         line_items=line_items,
         mode="payment",
-        success_url="http://127.0.0.1:8000/order/success/",
-        cancel_url="http://127.0.0.1:8000/order/cancel/",
+        success_url="http://ecom.kuldeepsaini.in/order/success/",
+        cancel_url="http://ecom.kuldeepsaini.in/order/cancel/",
     )
 
     order = Order.objects.create(
