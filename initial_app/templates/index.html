@@ -178,7 +178,7 @@
                                         Continue Shopping
                                     </button>
 
-                                    <a class="btn btn-primary w-50" href="{% url 'initial:checkout' %}">
+                                    <a class="btn btn-primary w-50 checkout-btn" href="{% url 'initial:checkout' %}">
                                         Checkout
                                     </a>
                                 </div>
@@ -366,6 +366,16 @@
                     priceEl.innerText = `₹${total.toLocaleString('en-IN')}`;
                 });
             });
+        </script>
+
+
+        <script>
+        document.querySelectorAll('.checkout-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                this.classList.add('disabled');
+                this.innerText = 'Processing...';
+            });
+        });
         </script>
 
 

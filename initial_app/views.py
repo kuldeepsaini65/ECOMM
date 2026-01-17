@@ -69,24 +69,21 @@ def add_cart(request):
 
 @login_required(login_url='initial:login')
 def cart_delete(request, id):
-    cart_item = Cart.objects.get(id=id)
-    if cart_item.user == request.user:
-        cart_item.delete()
-        messages.success(request, f'{cart_item.item.name} has been removed from Cart.')
-    else:
-        messages.error(request, f'Request Rejected by System.')
+    cart_item = Cart.objects.filter(id=id, user=request.user)
+    cart_item.delete()
+    messages.success(request, f'Item has been removed from Cart.')
 
     return redirect('initial:home')
-
-
-
-
 
 
 
 @login_required(login_url='initial:login')
 def create_checkout_session(request):
     cart_items = Cart.objects.select_related("item").filter(user=request.user)
+    if not cart_items.exists():
+        print(cart_items.count())
+        messages.error(request, 'Your Cart is Empty')
+        return redirect('initial:home')
 
     line_items = []
     total_amount_inr = Decimal("0.00")
@@ -112,6 +109,7 @@ def create_checkout_session(request):
         mode="payment",
         success_url="http://ecom.kuldeepsaini.in/order/success/",
         cancel_url="http://ecom.kuldeepsaini.in/order/cancel/",
+        idempotency_key=f"checkout_{request.user.id}"
     )
 
     order = Order.objects.create(
