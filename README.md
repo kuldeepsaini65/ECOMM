@@ -8,6 +8,8 @@ It demonstrates product listing, cart management, Stripe (test mode) payment int
 ## 🌐 Live Project URL
 
 The project is deployed and accessible at:
+Username: demo
+Password: TmaxHunter
 
 👉 https://ecom.kuldeepsaini.in
 
